@@ -20,8 +20,6 @@ function createCard(card, deleteButtonClickHandler) {
 }
 
 function deleteCard(card) {
-  /*   const clickedCard = evt.target.closest(".card");
-  clickedCard.remove(); */
   card.remove();
 }
 
