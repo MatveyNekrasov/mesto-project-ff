@@ -11,8 +11,11 @@ module.exports = {
     publicPath: "",
   },
   mode: "development",
+  devtool: "inline-source-map",
   devServer: {
     static: path.resolve(__dirname, "./dist"),
+    watchFiles: ["src/*.html"],
+    hot: true,
     compress: true,
     port: 8080,
     open: true,
