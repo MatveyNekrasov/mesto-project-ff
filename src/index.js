@@ -1,17 +1,10 @@
 import "./pages/index.css";
 import { initialCards } from "./scripts/cards.js";
 import { createCard, likeCard, deleteCard } from "./scripts/card.js";
-import {
-  openModal,
-  closeModal,
-  closePopupOnOverlayClick,
-  closePopupOnEscKeydown,
-} from "./scripts/modal.js";
-
-const page = document.querySelector(".page");
+import { openModal, closeModal } from "./scripts/modal.js";
 
 const cardsListContainer = document.querySelector(".places__list");
-export const cardTemplate = document.querySelector("#card-template").content;
+const popups = document.querySelectorAll(".popup");
 
 const profileEditPopup = document.querySelector(".popup_type_edit");
 const profileEditButton = document.querySelector(".profile__edit-button");
@@ -81,13 +74,16 @@ profileEditForm.addEventListener("submit", handleProfileEditFormSubmit);
 cardAddButton.addEventListener("click", () => openModal(cardAddPopup));
 cardAddForm.addEventListener("submit", handleCardAddFormSubmit);
 
-page.addEventListener("click", (evt) => {
-  if (evt.target.classList.contains("popup__close")) {
-    closeModal(evt.target.closest(".popup"));
-  }
+popups.forEach((popup) => {
+  popup.addEventListener("mousedown", (evt) => {
+    if (evt.target.classList.contains("popup__close")) {
+      closeModal(popup);
+    }
+    if (evt.target.classList.contains("popup_is-opened")) {
+      closeModal(popup);
+    }
+  });
 });
-page.addEventListener("click", closePopupOnOverlayClick);
-page.addEventListener("keydown", closePopupOnEscKeydown);
 
 initialCards.forEach((card) => {
   cardsListContainer.append(
