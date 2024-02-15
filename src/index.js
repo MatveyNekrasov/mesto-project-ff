@@ -2,6 +2,12 @@ import "./pages/index.css";
 import { initialCards } from "./scripts/cards.js";
 import { createCard, likeCard, deleteCard } from "./scripts/card.js";
 import { openModal, closeModal } from "./scripts/modal.js";
+import {
+  enableValidation,
+  clearValidation,
+  validationConfig,
+} from "./scripts/validation.js";
+import { getUserProfile } from "./scripts/api.js";
 
 const cardsListContainer = document.querySelector(".places__list");
 const popups = document.querySelectorAll(".popup");
@@ -30,6 +36,7 @@ const newCardLinkInput = cardAddForm.elements["link"];
 function prepareProfileEditForm(title, description) {
   profileEditNameInput.value = title;
   profileEditDescInput.value = description;
+  clearValidation(profileEditForm, validationConfig);
 }
 
 function handleProfileEditFormSubmit(evt) {
@@ -59,6 +66,9 @@ function handleCardAddFormSubmit(evt) {
     createCard(newCard, handleCardImageClick, likeCard, deleteCard)
   );
   cardAddForm.reset();
+  cardAddForm
+    .querySelector(validationConfig.submitButtonSelector)
+    .classList.add(validationConfig.inactiveButtonClass);
   closeModal(cardAddPopup);
 }
 
@@ -90,3 +100,8 @@ initialCards.forEach((card) => {
     createCard(card, handleCardImageClick, likeCard, deleteCard)
   );
 });
+
+enableValidation(validationConfig);
+
+const user = getUserProfile();
+console.log(user);
