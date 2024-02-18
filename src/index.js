@@ -1,23 +1,25 @@
 import "./pages/index.css";
-import {
-  createCard,
-  handleLikeButtonClick,
-  handleDeleteButtonClick,
-} from "./scripts/card.js";
+import { createCard, handleLikeButtonClick } from "./scripts/card.js";
 import { openModal, closeModal } from "./scripts/modal.js";
-import {
-  enableValidation,
-  clearValidation,
-  validationConfig,
-} from "./scripts/validation.js";
+import { enableValidation, clearValidation } from "./scripts/validation.js";
 import {
   getUserProfile,
   getCardList,
   patchUserProfile,
   postNewCard,
   patchUserAvatar,
+  deleteCard,
   isImageURL,
 } from "./scripts/api.js";
+
+const validationConfig = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_is-inactive",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__input-error_is-active",
+};
 
 let currentUserId;
 
@@ -50,12 +52,15 @@ const cardAddForm = document.forms["new-place"];
 const newCardNameInput = cardAddForm.elements["place-name"];
 const newCardLinkInput = cardAddForm.elements["link"];
 
+const deleteCardPopup = document.querySelector(".popup_type_delete");
+const confirmCardDeleteButton = deleteCardPopup.querySelector(".popup__button");
+const cardToDelete = {
+  cardId: null,
+  cardElement: null,
+};
+
 function renderLoading(isLoading, buttonElement) {
-  if (isLoading) {
-    buttonElement.textContent = "Сохранение...";
-  } else {
-    buttonElement.textContent = "Сохранить";
-  }
+  buttonElement.textContent = isLoading ? "Сохранение..." : "Сохранить";
 }
 
 function renderUserProfile(profileData) {
@@ -89,9 +94,9 @@ function initApp(profileDataPromise, cardListPromise) {
 }
 
 function prepareProfileEditForm(title, description) {
+  clearValidation(profileEditForm, validationConfig);
   profileEditNameInput.value = title;
   profileEditDescInput.value = description;
-  clearValidation(profileEditForm, validationConfig);
 }
 
 function handleProfileEditFormSubmit(evt) {
@@ -130,11 +135,8 @@ function handleCardAddFormSubmit(evt) {
           handleDeleteButtonClick
         )
       );
-      cardAddForm.reset();
       closeModal(cardAddPopup);
-      cardAddForm
-        .querySelector(validationConfig.submitButtonSelector)
-        .classList.add(validationConfig.inactiveButtonClass);
+      clearValidation(cardAddForm, validationConfig);
     })
     .catch((err) => console.log(err))
     .finally(() => renderLoading(false, submitButtonElement));
@@ -165,6 +167,22 @@ function handleCardImageClick(evt) {
   imagePopupPhotoCaption.textContent = cardTitle.textContent;
 }
 
+function handleDeleteButtonClick(cardId, cardElement) {
+  openModal(deleteCardPopup);
+  cardToDelete.cardId = cardId;
+  cardToDelete.cardElement = cardElement;
+}
+
+function handleConfirmButtonClick(cardToDelete) {
+  debugger;
+  deleteCard(cardToDelete.cardId)
+    .then(() => {
+      closeModal(deleteCardPopup);
+      cardToDelete.cardElement.remove();
+    })
+    .catch((err) => console.log(err));
+}
+
 profileEditButton.addEventListener("click", () => {
   prepareProfileEditForm(
     profileTitle.textContent,
@@ -180,12 +198,16 @@ profileAvatarEditForm.addEventListener("submit", handleAvatarChangeFormSubmit);
 cardAddButton.addEventListener("click", () => openModal(cardAddPopup));
 cardAddForm.addEventListener("submit", handleCardAddFormSubmit);
 
+confirmCardDeleteButton.addEventListener("click", () =>
+  handleConfirmButtonClick(cardToDelete)
+);
+
 popups.forEach((popup) => {
   popup.addEventListener("mousedown", (evt) => {
-    if (evt.target.classList.contains("popup__close")) {
-      closeModal(popup);
-    }
-    if (evt.target.classList.contains("popup_is-opened")) {
+    if (
+      evt.target.classList.contains("popup__close") ||
+      evt.target.classList.contains("popup_is-opened")
+    ) {
       closeModal(popup);
     }
   });

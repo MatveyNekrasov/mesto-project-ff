@@ -6,34 +6,30 @@ const apiConfig = {
   },
 };
 
+function handleResponse(response, errorMessage) {
+  if (response.ok) {
+    return response.json();
+  }
+  return Promise.reject(`${errorMessage}: ${response.status}`);
+}
+
 export function getUserProfile() {
   return fetch(`${apiConfig.baseURL}/users/me`, {
     headers: apiConfig.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при запросе информации о пользователе: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) =>
+    handleResponse(
+      res,
+      "Произошла ошибка при запросе информации о пользователе:"
+    )
+  );
 }
 
 export function getCardList() {
   return fetch(`${apiConfig.baseURL}/cards`, {
     headers: apiConfig.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при запросе списка карточек: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) =>
+    handleResponse(res, "Произошла ошибка при запросе списка карточек")
+  );
 }
 
 export function patchUserProfile(profileData) {
@@ -41,20 +37,16 @@ export function patchUserProfile(profileData) {
     method: "PATCH",
     headers: apiConfig.headers,
     body: JSON.stringify(profileData),
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при обновлении информации о пользователе: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) =>
+    handleResponse(
+      res,
+      "Произошла ошибка при обновлении информации о пользователе"
+    )
+  );
 }
 
 /* Опциональная проверка, что юзер указал ссылку на картинку при выборе аватарки пока не реализована -
-некоторые ресурсы блокируют запрос из-за настроек CORC, пока не придумал как это поправить*/
+некоторые ресурсы блокируют запрос из-за настроек CORS, пока не придумал как это поправить*/
 
 /* export function isImageURL(URL) {
   let isImage;
@@ -77,16 +69,9 @@ export function patchUserAvatar(avatarURL) {
     body: JSON.stringify({
       avatar: avatarURL,
     }),
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при обновлении аватарки пользователя: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) =>
+    handleResponse(res, "Произошла ошибка при обновлении аватарки пользователя")
+  );
 }
 
 export function postNewCard(card) {
@@ -94,62 +79,32 @@ export function postNewCard(card) {
     method: "POST",
     headers: apiConfig.headers,
     body: JSON.stringify(card),
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при добавлении новой карточки: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) =>
+    handleResponse(res, "Произошла ошибка при добавлении новой карточки")
+  );
 }
 
 export function deleteCard(cardId) {
   return fetch(`${apiConfig.baseURL}/cards/${cardId}`, {
     method: "DELETE",
     headers: apiConfig.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при удалении карточки пользователя: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) =>
+    handleResponse(res, "Произошла ошибка при удалении карточки пользователя")
+  );
 }
 
 export function putCardLike(cardId) {
   return fetch(`${apiConfig.baseURL}/cards/likes/${cardId}`, {
     method: "PUT",
     headers: apiConfig.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при лайке карточки: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) => handleResponse(res, "Произошла ошибка при лайке карточки"));
 }
 
 export function deleteCardLike(cardId) {
   return fetch(`${apiConfig.baseURL}/cards/likes/${cardId}`, {
     method: "DELETE",
     headers: apiConfig.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(
-        `Произошла ошибка при дизлайке карточки: ${res.status}`
-      );
-    })
-    .catch((err) => console.log(err));
+  }).then((res) =>
+    handleResponse(res, "Произошла ошибка при дизлайке карточки")
+  );
 }

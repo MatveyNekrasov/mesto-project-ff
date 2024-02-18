@@ -1,9 +1,6 @@
-import { openModal, closeModal } from "./modal.js";
-import { deleteCard, putCardLike, deleteCardLike } from "./api.js";
+import { putCardLike, deleteCardLike } from "./api.js";
 
 const cardTemplate = document.querySelector("#card-template").content;
-const deleteCardPopup = document.querySelector(".popup_type_delete");
-const confirmCardDeleteButton = deleteCardPopup.querySelector(".popup__button");
 
 export function createCard(
   card,
@@ -29,7 +26,7 @@ export function createCard(
     likeButtonClickHandler(evt, card._id, likesCount);
   });
 
-  if (card.likes.find((like) => like._id === userId)) {
+  if (card.likes.some((like) => like._id === userId)) {
     likeButton.classList.add("card__like-button_is-active");
   }
 
@@ -46,45 +43,19 @@ export function createCard(
 }
 
 export function handleLikeButtonClick(evt, cardId, likesCountElement) {
-  if (isCardLiked(evt.target)) {
-    deleteCardLike(cardId).then((res) => {
+  const likeMethod = isCardLiked(evt.target) ? deleteCardLike : putCardLike;
+  likeMethod(cardId)
+    .then((res) => {
       renderLikesCount(likesCountElement, res.likes.length);
-      evt.target.classList.remove("card__like-button_is-active");
-    });
-  } else {
-    putCardLike(cardId).then((res) => {
-      renderLikesCount(likesCountElement, res.likes.length);
-      evt.target.classList.add("card__like-button_is-active");
-    });
-  }
+      evt.target.classList.toggle("card__like-button_is-active");
+    })
+    .catch((err) => console.log(err));
 }
 
 function isCardLiked(buttonElement) {
-  if (buttonElement.classList.contains("card__like-button_is-active")) {
-    return true;
-  } else {
-    return false;
-  }
+  return buttonElement.classList.contains("card__like-button_is-active");
 }
 
 function renderLikesCount(likesCountElement, likesCount) {
   likesCountElement.textContent = likesCount;
-}
-
-export function handleDeleteButtonClick(cardId, cardElement) {
-  openModal(deleteCardPopup);
-  confirmCardDeleteButton.addEventListener("click", handleConfirmButtonClick);
-
-  function handleConfirmButtonClick() {
-    deleteCard(cardId)
-      .then(() => {
-        closeModal(deleteCardPopup);
-        cardElement.remove();
-        confirmCardDeleteButton.removeEventListener(
-          "click",
-          handleConfirmButtonClick
-        );
-      })
-      .catch((err) => console.log(err));
-  }
 }
